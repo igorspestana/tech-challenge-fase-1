@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+
+# Packaging
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Tools
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local env (tokens, secrets)
+.env
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Data artifacts (adjust if small samples should be tracked)
+data/*.csv
+data/*.parquet
+data/*.zip
