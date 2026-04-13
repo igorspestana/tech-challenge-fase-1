@@ -106,3 +106,4 @@ docker compose -f compose.dev.yaml run --rm jupyter uv run python -m pipeline
 - **Igor da Costa Silveira Pestana** - igor.pestana@alura.com.br
 - **Emídio Dias Maciel e Souza** - emidiodmsouza@gmail.com
 - **Caê Moreira Euphrasio** - caedeminas@gmail.com
+- **Isabella Santiago Bueno Silva** - bellasantiag10@gmail.com
