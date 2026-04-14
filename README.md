@@ -44,6 +44,24 @@ uv sync
 uv run jupyter lab
 ```
 
+### Configuração do nbstripout (obrigatório)
+
+O projeto usa [nbstripout](https://github.com/kynan/nbstripout) para evitar que outputs e metadados dos notebooks sejam commitados. **Todos os membros do time precisam rodar este comando uma vez após clonar o repositório:**
+
+```bash
+uv run nbstripout --install --attributes .gitattributes
+```
+
+Isso registra o filtro do Git localmente. O arquivo `.gitattributes` já está no repositório com as regras:
+
+```
+*.ipynb filter=nbstripout
+*.zpln filter=nbstripout
+*.ipynb diff=ipynb
+```
+
+Verifique se está ativo com `uv run nbstripout --status`.
+
 Por padrão o Jupyter gera um token novo a cada subida; em geral basta abrir pelo link que o comando imprime (já inclui `?token=...`) ou confiar no cookie do navegador após o primeiro acesso.
 
 Para rodar o script do pipeline (após implementar `src/pipeline.py`):
