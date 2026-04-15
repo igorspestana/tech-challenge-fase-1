@@ -54,7 +54,7 @@ uv run nbstripout --install --attributes .gitattributes
 
 Isso registra o filtro do Git localmente. O arquivo `.gitattributes` já está no repositório com as regras:
 
-```
+```gitattributes
 *.ipynb filter=nbstripout
 *.zpln filter=nbstripout
 *.ipynb diff=ipynb
