@@ -2,15 +2,12 @@
 
 ## Grupo
 
-
-| Integrante   | Perfil                   |
-| ------------ | ------------------------ |
-| Emídio Souza | Python / AI / Backend    |
-| Alan Araújo  | PHP / Backend            |
-| Caê          | JS / Python / Front      |
-| Igor Pestana | JS / Python / Full Stack |
-| Isa Santiago | Início em ML             |
-
+  | Integrante                         | Contato                         |
+| ---------------------------------- | ------------------------------- |
+| Alan Araujo Soares                 | aalan.araujo@hotmail.com        |
+| Igor da Costa Silveira Pestana     | igor.pestana@alura.com.br       |
+| Emídio Dias Maciel e Souza         | emidiodmsouza@gmail.com         |
+| Caê Moreira Euphrasio              | caedeminas@gmail.com            |
 
 **Tema escolhido:** Segurança e Saúde da Mulher (Documento B)
 
@@ -20,86 +17,68 @@
 
 ---
 
-## Dataset — pra debater no grupo
+## Dataset — decisão e escopo
 
-Temos duas opções realistas pro nosso Tech Challenge. Cada uma tem vantagens e riscos diferentes, e vale a gente decidir junto com base no tempo disponível e no nível de conforto de cada um com Python e dados.
+**Escolha do grupo:** **SINASC / DATASUS (Opção B)** — dados reais de nascidos vivos, com foco em **Minas Gerais**, Declarações de Nascido Vivo (**DN**), anos **2020, 2021 e 2022**, obtidos via biblioteca **[PySUS](https://pypi.org/project/pysus/)** (`pysus` no projeto).
 
-### Opção A — Breast Cancer Wisconsin (caminho seguro)
+**Problema de modelagem (alvo):** classificar risco de **prematuridade** (gestação abaixo de 37 semanas) e/ou **baixo peso ao nascer** (abaixo de 2500 g), alinhado ao tema de saúde materno-infantil no SUS.
 
-Fonte: [https://www.kaggle.com/datasets/uciml/breast-cancer-wisconsin-data](https://www.kaggle.com/datasets/uciml/breast-cancer-wisconsin-data)
+**O que já está no EDA (`01_eda.ipynb`):**
 
-São 569 amostras com 30 features numéricas extraídas de imagens de biópsia. O target é binário: maligno ou benigno. Não tem valores faltantes, tudo já vem numérico, e é uma das sugestões do próprio enunciado.
+- Carga e inspeção via `SINASC` (grupos, metadados, download `.dbc` → parquet em `data/`).
+- Concatenação dos anos e tratamento inicial de tipos e sentinelas do DATASUS.
+- **Merge com tabela de municípios do IBGE** para **latitude e longitude** a partir de `CODMUNRES` (join alinhando código IBGE 6/7 dígitos conforme documentado no notebook).
 
-**Prós:** Dataset limpo, pronto pra usar, amplamente documentado na internet. Permite focar 100% no que o enunciado avalia (pipeline, modelagem, métricas, SHAP) sem perder tempo com limpeza. Baixo risco de atraso.
+**Enriquecimento adicional (opcional / relatório):** IDH municipal, PIB per capita, cobertura e-SUS, taxa de urbanização — fontes em [IBGE — cidades e estados](https://www.ibge.gov.br/cidades-e-estados). Não estão obrigatoriamente no código atual; podem entrar como evolução do feature engineering se couber no prazo.
 
-**Contras:** Todo mundo vai entregar esse dataset. Não tem identidade brasileira. A exploração de dados fica mais superficial porque não tem muito o que limpar ou transformar, o que pode enfraquecer a seção de pré-processamento do relatório.
+**Alternativas não adotadas como eixo principal:** Breast Cancer Wisconsin (Opção A) e combinação A+B (Opção C) ficam como referência bibliográfica se o relatório quiser comparar abordagens; o repositório segue **apenas SINASC**.
 
-### Opção B — SINASC / DATASUS (caminho diferenciado)
+**Extra (opcional, bônus):** CNN em mamografias ([CBIS-DDSM](https://www.kaggle.com/datasets/awsaf49/cbis-ddsm-breast-cancer-image-dataset)). Só após os itens obrigatórios estarem sólidos.
 
-Fonte: OpenDataSUS / FTP DATASUS (acessível via biblioteca Python PySUS)
+---
 
-O SINASC (Sistema de Informações sobre Nascidos Vivos) registra todos os partos no Brasil. Cada linha é um nascimento com dezenas de variáveis: idade da mãe, escolaridade, semanas de gestação, tipo de parto, número de consultas pré-natal, peso do recém-nascido, APGAR, presença de anomalias congênitas, município, raça/cor. Dá pra filtrar por Minas Gerais ou até por Belo Horizonte.
+## Estado atual do repositório (alinhado ao código)
 
-O problema clínico seria classificar risco de prematuridade (abaixo de 37 semanas) ou baixo peso ao nascer (abaixo de 2500g), ambos problemas reais e relevantes de saúde materno-infantil no SUS.
-
-**Enriquecimento com dados do IBGE:** O SINASC não tem latitude/longitude, mas tem código do município IBGE (6 dígitos) tanto do nascimento (`CODMUNNASC`) quanto da residência da mãe (`CODMUNRES`). Dá pra cruzar com dados públicos do IBGE pra adicionar variáveis geográficas e socioeconômicas por município:
-
-- **Coordenadas geográficas** (lat/lng do centroide do município) — permite fazer mapas e usar localização como feature
-- **IDH municipal** — proxy forte de condição socioeconômica
-- **PIB per capita municipal**
-- **Cobertura da atenção primária (e-SUS)** — disponível no DATASUS/e-Gestor AB
-- **Taxa de urbanização**
-
-Fonte das tabelas auxiliares: [https://www.ibge.gov.br/cidades-e-estados](https://www.ibge.gov.br/cidades-e-estados) (API IBGE ou download CSV). O merge é simples: um left join pelo código IBGE do município. Isso adiciona contexto territorial ao modelo e enriquece muito a análise exploratória, permitindo visualizações geográficas (mapas de calor de prematuridade por região de MG, por exemplo).
-
-**Prós:** Dados reais brasileiros do SUS, com relevância direta pro tema de saúde da mulher. Diferencia o grupo de todos que vão entregar o breast cancer. A limpeza de dados reais (valores codificados, missing values de verdade, variáveis categóricas) enriquece muito a seção de pré-processamento do relatório. Volume enorme, o que mostra maturidade no recorte e tratamento. O enriquecimento com IBGE adiciona uma etapa de feature engineering com dados externos, que demonstra maturidade analítica.
-
-**Contras:** Os dados vêm codificados (ex: "1" = vaginal, "2" = cesárea) e exigem consulta ao dicionário de dados do DATASUS. Tem valores faltantes reais que precisam de tratamento. Consome mais tempo no pré-processamento. Se o grupo travar na limpeza, pode comprometer o prazo.
-
-### Opção C — Combinar as duas
-
-Usar o Breast Cancer Wisconsin como entrega principal garantida, e incluir o SINASC como análise complementar no relatório, mostrando que o grupo sabe lidar com dados reais brasileiros. Isso cobre a segurança da nota e adiciona um diferencial.
-
-### Pra discussão no dia 03/04
-
-Perguntas pra gente responder juntos:
-
-1. Quanto tempo cada um tem disponível por semana até 05/05?
-2. Alguém já tem experiência com Pandas e limpeza de dados sujos, ou estamos todos aprendendo?
-3. A gente quer se diferenciar (Opção B ou C) ou quer segurança máxima (Opção A)?
-4. Quem já tem o uv instalado e o ambiente testado?
-5. **Dataset brasileiro:** a Opção B (SINASC) usa dados reais do SUS, o que dá identidade ao projeto e mostra que sabemos trabalhar com dados do mundo real. Mas exige mais esforço de limpeza. O grupo topa esse esforço extra, sabendo que o resultado final fica mais forte? Ou preferimos o caminho seguro e garantir a nota sem risco de atraso?
-
-**Extra (opcional, pra pontos bônus):** Detecção de câncer de mama em mamografias com CNN
-
-Fonte: [https://www.kaggle.com/datasets/awsaf49/cbis-ddsm-breast-cancer-image-dataset](https://www.kaggle.com/datasets/awsaf49/cbis-ddsm-breast-cancer-image-dataset)
-
-Só vale a pena investir nisso se todos os itens obrigatórios estiverem cobertos com qualidade. Não comprometer o essencial pelo bônus.
+| Artefato | Status |
+| -------- | ------ |
+| `notebooks/01_eda.ipynb` | Em andamento avançado: SINASC MG, PySUS, merge IBGE (lat/lng). |
+| `notebooks/02_preprocessing.ipynb` | Esqueleto: falta implementar pipeline de limpeza/encoding/salvamento. |
+| `notebooks/03_modeling.ipynb` | Esqueleto: falta modelos, métricas e validação cruzada. |
+| `notebooks/04_interpretability.ipynb` | Esqueleto: falta RF importance, SHAP e discussão. |
+| `src/pipeline.py` | Stub (`NotImplementedError`): orquestração CLI/Docker pendente. |
+| `Dockerfile` | Presente: comando padrão `uv run python -m pipeline`. |
+| `compose.yaml` / `compose.dev.yaml` | Presentes: Jupyter Lab com volumes para `notebooks/`, `data/`, `results/`, `src/`. |
+| `README.md` | Instruções de uv, Docker e Compose. |
+| `docs/relatorio.pdf` | A produzir na entrega. |
 
 ---
 
 ## Estrutura do repositório
 
 ```
-tech-challenge-fase1/
-├── README.md                  # Instruções de execução
-├── Dockerfile                 # Ambiente reproduzível (opcional no doc B)
-├── pyproject.toml             # Dependências
-├── uv.lock                    # Lock exato
+tech-challenge-fase-1/
+├── README.md
+├── Dockerfile
+├── compose.yaml               # Jupyter (token variável)
+├── compose.dev.yaml           # Jupyter (token fixo de dev)
+├── pyproject.toml
+├── uv.lock
+├── .python-version            # 3.12.x
 ├── notebooks/
-│   ├── 01_eda.ipynb           # Exploração e análise descritiva
-│   ├── 02_preprocessing.ipynb # Limpeza e transformação
-│   ├── 03_modeling.ipynb      # Treino e avaliação dos modelos
-│   └── 04_interpretability.ipynb  # SHAP e feature importance
+│   ├── 01_eda.ipynb
+│   ├── 02_preprocessing.ipynb
+│   ├── 03_modeling.ipynb
+│   └── 04_interpretability.ipynb
 ├── src/
-│   └── pipeline.py            # Pipeline completo em script (pra Dockerfile)
+│   └── pipeline.py
 ├── data/
-│   └── README.md              # Link pro download do dataset
+│   └── README.md              # Origem dos dados SINASC / pastas locais
 ├── results/
-│   ├── figures/               # Gráficos exportados
-│   └── metrics/               # Tabelas de métricas
+│   ├── figures/
+│   └── metrics/
 └── docs/
-    └── relatorio.pdf          # Relatório técnico final
+    ├── plan.md
+    └── relatorio.pdf          # Relatório técnico final (entrega)
 ```
 
 ---
@@ -110,64 +89,55 @@ Os blocos abaixo seguem uma ordem lógica de dependência: cada um usa o resulta
 
 ### Bloco 1 — Exploração e Pré-processamento (semana 1: 03/04 a 10/04)
 
-Esse bloco é ideal pra quem está começando em ML, porque é o primeiro contato prático com os dados e usa conceitos fundamentais.
-
-- Carregar o dataset com Pandas
-- Estatísticas descritivas: shape, dtypes, describe(), value_counts() do target
-- Visualizações: histogramas das features, boxplots, distribuição do target
+- Carregar o dataset com Pandas (parquet gerado pelo fluxo SINASC)
+- Estatísticas descritivas: shape, dtypes, describe(), distribuição do target
+- Visualizações: histogramas, boxplots, distribuição do target (matplotlib / seaborn / plotly conforme o notebook)
 - Matriz de correlação com heatmap (Seaborn)
-- Verificar e tratar valores ausentes
+- Verificar e tratar valores ausentes e sentinelas DATASUS
 - Separar features (X) e target (y)
-- Normalização/padronização (StandardScaler)
-- Conversão de variáveis se necessário
-- Salvar dados processados pra próximo bloco
+- Normalização/padronização (StandardScaler) onde fizer sentido
+- Encoding de categóricas
+- Salvar dados processados para o próximo bloco
 
-**Entrega:** notebooks 01_eda.ipynb e 02_preprocessing.ipynb funcionando
+**Entrega:** `01_eda.ipynb` e `02_preprocessing.ipynb` funcionando de ponta a ponta.
 
 ### Bloco 2 — Modelagem e Avaliação (semana 2: 10/04 a 17/04)
 
 - Train/test split (80/20 ou 70/30, estratificado)
-- Implementar no mínimo 2 modelos de classificação:
+- Pelo menos 2 modelos de classificação:
   - Regressão Logística (baseline linear)
   - Random Forest (baseline ensemble)
-  - Sugestão de terceiro: SVM ou Gradient Boosting
+  - Terceiro opcional: SVM ou Gradient Boosting
 - Métricas: accuracy, precision, recall, F1-score, matriz de confusão
-- Discussão da escolha da métrica (em diagnóstico médico, recall é mais importante que accuracy — um falso negativo significa deixar de diagnosticar um caso de risco)
-- Comparação entre modelos com tabela de métricas
-- Cross-validation (5-fold) pra robustez
+- Discussão da métrica mais relevante (em saúde, recall costuma pesar contra falsos negativos)
+- Comparação entre modelos em tabela
+- Cross-validation (5-fold) para robustez
 
-**Entrega:** notebook 03_modeling.ipynb funcionando
+**Entrega:** `03_modeling.ipynb` funcionando.
 
 ### Bloco 3 — Interpretabilidade e Discussão (semana 3: 17/04 a 24/04)
 
 - Feature importance do Random Forest
-- SHAP values (summary plot, force plot pra casos individuais)
-- Discussão crítica:
-  - O modelo pode ser usado na prática? (Sim, como ferramenta de triagem, nunca como substituto do médico)
-  - Quais features são mais preditivas?
-  - Limitações: viés de seleção, representatividade dos dados, etc.
-  - O médico sempre tem a palavra final
+- SHAP (summary plot, force plot em casos individuais)
+- Discussão crítica: uso prático como apoio à triagem (não substitui decisão clínica), features mais preditivas, limitações de viés e representatividade
 
-**Entrega:** notebook 04_interpretability.ipynb funcionando
+**Entrega:** `04_interpretability.ipynb` funcionando.
 
 ### Bloco 4 — Integração e Entrega (semana 4: 24/04 a 03/05)
 
-Esse bloco é de todos.
-
-- Dockerfile funcional
-- README.md com instruções claras de execução
+- `pipeline.py` reproduzindo o fluxo principal (para Docker e `uv run python -m pipeline`)
+- README revisado
 - Relatório técnico em PDF cobrindo:
   - Discussões da análise exploratória
   - Estratégias de pré-processamento
   - Modelos usados e justificativa
   - Resultados e interpretação
-- Gravação do vídeo de demonstração (até 15 min)
+- Vídeo (até 15 min)
 - Revisão final e upload
 
 ---
 
 ## Cronograma resumido
-
 
 | Semana | Período       | Atividade                    | Responsáveis |
 | ------ | ------------- | ---------------------------- | ------------ |
@@ -177,29 +147,28 @@ Esse bloco é de todos.
 | 4      | 24/04 — 03/05 | Integração, relatório, vídeo | Todos        |
 | —      | 05/05         | **Entrega**                  | —            |
 
-
 ---
 
 ## Stack técnica
 
-- **Python 3.12**
-- **JupyterLab** pra desenvolvimento dos notebooks
-- **Bibliotecas principais:** pandas, numpy, matplotlib, seaborn, scikit-learn, shap
-- **Git/GitHub** pra versionamento
-- **Docker** (opcional no doc B) pra reprodutibilidade
+- **Python 3.12** (ver `.python-version`)
+- **JupyterLab** para os notebooks
+- **Núcleo de análise e ML:** pandas, numpy, matplotlib, seaborn, **plotly**, scikit-learn, shap
+- **Dados SUS:** **pysus** (download e leitura SINASC)
+- **Reprodutibilidade:** **uv** (`pyproject.toml`, `uv.lock`), **Docker** e **Docker Compose** (ver `README.md`)
+- **Ferramentas de desenvolvimento no projeto:** jupyterlab-lsp, python-lsp-server, nbstripout (limpeza de outputs em notebooks, se adotado pelo grupo)
+- **Git/GitHub** para versionamento
 
 ### Setup (uv)
 
-O uv gerencia pacotes e ambientes via `pyproject.toml` e `uv.lock`, garantindo o mesmo ambiente para todo mundo.
-
 ```bash
 git clone <repo-url>
-cd tech-challenge-fase1
-uv sync              # instala tudo do pyproject.toml
-uv run jupyter lab   # roda o Jupyter no ambiente do projeto
+cd tech-challenge-fase-1
+uv sync
+uv run jupyter lab
 ```
 
-Pra adicionar dependências: `uv add pandas scikit-learn shap` (atualiza o `pyproject.toml` e o lock automaticamente).
+Para adicionar dependências: `uv add <pacote>`.
 
 ---
 
