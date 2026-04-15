@@ -30,7 +30,9 @@ build/
 .vscode/
 
 # Data artifacts (adjust if small samples should be tracked)
-data
+data/*
+!data/municipios_ibge.csv
+!data/municipios_mesorregiao_ibge.csv
 
 # Ignorar a pasta de arquivos temporários do Jupyter
 .virtual_documents/
