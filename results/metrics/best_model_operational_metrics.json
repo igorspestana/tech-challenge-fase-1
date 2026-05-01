@@ -1,0 +1,68 @@
+{
+  "model": "HistGB_Balanced",
+  "selection_rule": "fallback: max CV F2 (nenhum modelo atingiu recall mínimo)",
+  "threshold": 0.37999999999999995,
+  "imbalance_strategy": "sample_weight=balanced",
+  "metrics": {
+    "threshold": 0.37999999999999995,
+    "recall": 0.835174717368962,
+    "f2": 0.4094344375865978,
+    "f1": 0.2320211285199329,
+    "precision": 0.1347245824180379,
+    "accuracy": 0.38795420607267295,
+    "roc_auc": 0.6841982178483872,
+    "average_precision": 0.29382468453790905,
+    "brier": 0.21351654676395723,
+    "tp": 13002,
+    "tn": 41556,
+    "fp": 83506,
+    "fn": 2566
+  },
+  "metrics_default_threshold": {
+    "threshold": 0.5,
+    "recall": 0.509313977389517,
+    "f2": 0.3967396199225435,
+    "f1": 0.2979538921143115,
+    "precision": 0.21056964546540963,
+    "accuracy": 0.7343027803455877,
+    "roc_auc": 0.6841982178483872,
+    "average_precision": 0.29382468453790905,
+    "brier": 0.21351654676395723,
+    "tp": 7929,
+    "tn": 95336,
+    "fp": 29726,
+    "fn": 7639
+  },
+  "bootstrap_ci_95": {
+    "roc_auc": {
+      "low": 0.6798158814381697,
+      "high": 0.6886500295679475
+    },
+    "average_precision": {
+      "low": 0.28542628874818204,
+      "high": 0.301420291214716
+    },
+    "precision": {
+      "low": 0.13235825101098364,
+      "high": 0.13674036208015808
+    },
+    "recall": {
+      "low": 0.8301449803313651,
+      "high": 0.8405634167912109
+    },
+    "f2": {
+      "low": 0.40503335911039906,
+      "high": 0.41367011326195363
+    },
+    "brier": {
+      "low": 0.21283725133594042,
+      "high": 0.2142101733438727
+    }
+  },
+  "best_params": {
+    "min_samples_leaf": 100,
+    "max_leaf_nodes": 15,
+    "max_iter": 150,
+    "learning_rate": 0.1
+  }
+}
