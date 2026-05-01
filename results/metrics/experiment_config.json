@@ -4,6 +4,12 @@
   "min_recall_threshold": 0.8,
   "validation_size_for_threshold": 0.2,
   "bootstrap_rounds": 300,
+  "tested_models": [
+    "LogReg",
+    "RandomForest",
+    "HistGB",
+    "HistGB_Balanced"
+  ],
   "train_shape": [
     562520,
     46
