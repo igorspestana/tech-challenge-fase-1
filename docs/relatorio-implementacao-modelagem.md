@@ -27,7 +27,8 @@
 
 ## Fase 4 — Modelagem avançada desbalanceada
 - Entregas implementadas:
-  - candidatos: `LogisticRegression`, `RandomForest`, `HistGradientBoosting`
+  - candidatos: `LogisticRegression`, `RandomForest`, `HistGradientBoosting` e `HistGB_Balanced`
+  - variante `HistGB_Balanced` treinada com `sample_weight=balanced` para comparar o impacto do balanceamento no `HistGradientBoostingClassifier`
   - tuning controlado com `RandomizedSearchCV`
   - ranking salvo em `model_comparison_cv_test.csv`
 
