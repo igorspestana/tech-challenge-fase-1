@@ -37,13 +37,12 @@ REQUIRED_METRIC_FILES = (
     "best_model_operational_metrics.json",
 )
 SCENARIO_CHOICES = ("A", "B", "C", "D")
-MODEL_CHOICES = ("logreg", "random_forest", "histgb", "histgb_balanced")
-NOTEBOOK_MODEL_NAMES = ("LogReg", "RandomForest", "HistGB", "HistGB_Balanced")
+MODEL_CHOICES = ("logreg", "random_forest", "histgb")
+NOTEBOOK_MODEL_NAMES = ("LogReg", "RandomForest", "HistGB")
 MODEL_DISPLAY_NAMES = {
     "logreg": "LogisticRegression",
     "random_forest": "RandomForest",
-    "histgb": "HistGradientBoosting",
-    "histgb_balanced": "HistGradientBoosting + sample_weight",
+    "histgb": "HistGradientBoosting + sample_weight",
 }
 SCENARIO_DESCRIPTIONS = {
     "A": "baseline atual",
@@ -293,7 +292,7 @@ def build_estimator(model_name: str) -> Any:
             n_jobs=-1,
             random_state=42,
         )
-    if model_name in {"histgb", "histgb_balanced"}:
+    if model_name == "histgb":
         return HistGradientBoostingClassifier(
             learning_rate=0.1,
             max_iter=150,
@@ -360,19 +359,6 @@ def build_model_search_configs(random_state: int = 42, n_jobs: int = -1) -> dict
                 "min_samples_leaf": [20, 50, 100],
             },
             "n_iter": 10,
-            "imbalance_strategy": "none",
-            "use_balanced_sample_weight": False,
-        },
-        "HistGB_Balanced": {
-            "pipeline_model_name": "histgb_balanced",
-            "estimator": HistGradientBoostingClassifier(random_state=random_state),
-            "param_distributions": {
-                "max_iter": [150, 250, 350],
-                "learning_rate": [0.03, 0.05, 0.08, 0.1],
-                "max_leaf_nodes": [15, 31, 63],
-                "min_samples_leaf": [20, 50, 100],
-            },
-            "n_iter": 10,
             "imbalance_strategy": "sample_weight=balanced",
             "use_balanced_sample_weight": True,
         },
@@ -418,8 +404,8 @@ def build_pipeline(frame: pd.DataFrame, model_name: str):
 def fit_pipeline(pipeline, x_train: pd.DataFrame, y_train: pd.Series, model_name: str) -> None:
     fit_params = build_fit_kwargs(
         y_train,
-        use_balanced_sample_weight=(model_name == "histgb_balanced"),
-        pipeline_step_name="histgradientboostingclassifier" if model_name == "histgb_balanced" else None,
+        use_balanced_sample_weight=(model_name == "histgb"),
+        pipeline_step_name="histgradientboostingclassifier" if model_name == "histgb" else None,
     )
     pipeline.fit(x_train, y_train, **fit_params)
 

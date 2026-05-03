@@ -7,9 +7,14 @@
   "tested_models": [
     "LogReg",
     "RandomForest",
-    "HistGB",
-    "HistGB_Balanced"
+    "HistGB"
   ],
+  "tested_scenarios": [
+    "A",
+    "B",
+    "C"
+  ],
+  "winning_scenario": "A",
   "train_shape": [
     562520,
     46
