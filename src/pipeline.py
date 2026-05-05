@@ -36,7 +36,7 @@ REQUIRED_METRIC_FILES = (
     "model_comparison_cv_test.csv",
     "best_model_operational_metrics.json",
 )
-SCENARIO_CHOICES = ("A", "B", "C", "D")
+SCENARIO_CHOICES = ("A", "B", "C")
 MODEL_CHOICES = ("logreg", "random_forest", "histgb")
 NOTEBOOK_MODEL_NAMES = ("LogReg", "RandomForest", "HistGB")
 MODEL_DISPLAY_NAMES = {
@@ -45,17 +45,9 @@ MODEL_DISPLAY_NAMES = {
     "histgb": "HistGradientBoosting + sample_weight",
 }
 SCENARIO_DESCRIPTIONS = {
-    "A": "baseline atual",
-    "B": "escolaridade ordinal + gestacao multipla binaria",
-    "C": "cenario B + apenas IDADEMAE continua",
-    "D": "cenario C + apenas MESPRENAT",
-}
-ESCOLARIDADE_ORDINAL_MAP = {
-    "ESCMAE2010_SEM_ESCOLARIDADE": 0,
-    "ESCMAE2010_FUNDAMENTAL_II": 1,
-    "ESCMAE2010_MEDIO": 2,
-    "ESCMAE2010_SUPERIOR_INCOMPLETO": 3,
-    "ESCMAE2010_SUPERIOR_COMPLETO": 4,
+    "A": "dummies + bools",
+    "B": "ordinal + continuo",
+    "C": "todos",
 }
 BASE_NUMERIC_COLUMNS = [
     "IDADEMAE",
@@ -65,11 +57,11 @@ BASE_NUMERIC_COLUMNS = [
     "QTDFILVIVO",
     "QTDFILMORT",
     "MESPRENAT",
-    "IDADEPAI",
     "LATITUDE",
     "LONGITUDE",
     "PAI_AUSENTE",
-    "IDADEPAI_INVALIDA",
+    "KOTELCHUCK_IGNORADO",
+    "ESCMAE2010_IGNORADO",
     "PNTARDIO",
     "HISTPERDAFETAL",
     "PRIMIPARA",
@@ -217,69 +209,37 @@ def load_datasets(data_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series
     return x_train, x_test, y_train, y_test
 
 
-def require_columns(frame: pd.DataFrame, columns: list[str], label: str) -> None:
-    missing = [column for column in columns if column not in frame.columns]
-    if missing:
-        raise KeyError(f"{label} is missing required columns: {', '.join(missing)}")
 
-
-def add_escmae2010_ordinal(frame: pd.DataFrame) -> pd.DataFrame:
-    required_columns = list(ESCOLARIDADE_ORDINAL_MAP) + ["ESCMAE2010_IGNORADO"]
-    require_columns(frame, required_columns, "ESCMAE2010 ordinal conversion")
-
-    updated = frame.copy()
-    updated["ESCMAE2010_ORDINAL"] = -1
-    for column, value in ESCOLARIDADE_ORDINAL_MAP.items():
-        updated.loc[updated[column] == 1, "ESCMAE2010_ORDINAL"] = value
-
-    drop_columns = [column for column in ESCOLARIDADE_ORDINAL_MAP if column in updated.columns]
-    return updated.drop(columns=drop_columns)
-
-
-def add_gestacao_multipla(frame: pd.DataFrame) -> pd.DataFrame:
-    required_columns = ["GRAVIDEZ_UNICA", "GRAVIDEZ_IGNORADO"]
-    require_columns(frame, required_columns, "GESTACAO_MULTIPLA conversion")
-
-    updated = frame.copy()
-    updated["GESTACAO_MULTIPLA"] = (
-        (updated["GRAVIDEZ_IGNORADO"] == 0) & (updated["GRAVIDEZ_UNICA"] == 0)
-    ).astype("int64")
-
-    drop_columns = [
-        column
-        for column in updated.columns
-        if column.startswith("GRAVIDEZ_") and column != "GRAVIDEZ_IGNORADO"
-    ]
-    return updated.drop(columns=drop_columns)
+_SCENARIO_A_DROP = [
+    "IDADEMAE", "MESPRENAT", "QTDFILMORT", "QTDFILVIVO", "QTDGESTANT",
+    "ESCMAE2010_ORDINAL", "KOTELCHUCK_ORDINAL",
+]
+_SCENARIO_B_DROP = ["PNTARDIO", "HISTPERDAFETAL", "PRIMIPARA"]
 
 
 def apply_scenario(frame: pd.DataFrame, scenario: str) -> pd.DataFrame:
-    if scenario == "A":
+    if scenario == "C":
         return frame
 
     updated = frame.copy()
 
-    if scenario in {"B", "C", "D"}:
-        updated = add_escmae2010_ordinal(updated)
-        updated = add_gestacao_multipla(updated)
+    if scenario == "A":
+        drop = [c for c in _SCENARIO_A_DROP if c in updated.columns]
+        return updated.drop(columns=drop)
 
-    if scenario in {"C", "D"}:
-        faixa_columns = [column for column in updated.columns if column.startswith("FAIXAETAMAE_")]
-        updated = updated.drop(columns=faixa_columns)
+    if scenario == "B":
+        faixa_cols = [c for c in updated.columns if c.startswith("FAIXAETAMAE_")]
+        kotk_dummies = [c for c in updated.columns if c.startswith("KOTELCHUCK_") and c != "KOTELCHUCK_ORDINAL" and c != "KOTELCHUCK_IGNORADO"]
+        esc_dummies = [c for c in updated.columns if c.startswith("ESCMAE2010_") and c != "ESCMAE2010_ORDINAL" and c != "ESCMAE2010_IGNORADO"]
+        drop = faixa_cols + kotk_dummies + esc_dummies + [c for c in _SCENARIO_B_DROP if c in updated.columns]
+        return updated.drop(columns=drop)
 
-    if scenario == "D" and "PNTARDIO" in updated.columns:
-        updated = updated.drop(columns=["PNTARDIO"])
-
-    return updated
+    raise ValueError(f"Unsupported scenario: {scenario}")
 
 
 def get_numeric_columns(frame: pd.DataFrame) -> list[str]:
-    numeric_columns = list(BASE_NUMERIC_COLUMNS)
-    if "ESCMAE2010_ORDINAL" in frame.columns:
-        numeric_columns.append("ESCMAE2010_ORDINAL")
-    if "GESTACAO_MULTIPLA" in frame.columns:
-        numeric_columns.append("GESTACAO_MULTIPLA")
-    return [column for column in numeric_columns if column in frame.columns]
+    extra = [c for c in ("ESCMAE2010_ORDINAL", "KOTELCHUCK_ORDINAL") if c in frame.columns]
+    return [c for c in BASE_NUMERIC_COLUMNS + extra if c in frame.columns]
 
 
 def build_estimator(model_name: str) -> Any:
@@ -323,15 +283,13 @@ def build_model_search_configs(random_state: int = 42, n_jobs: int = -1) -> dict
             "pipeline_model_name": "logreg",
             "estimator": LogisticRegression(
                 class_weight="balanced",
-                max_iter=2000,
+                max_iter=500,
                 random_state=random_state,
-                n_jobs=n_jobs,
             ),
-            "param_distributions": {
-                "C": np.logspace(-2, 1, 12),
-                "solver": ["liblinear", "saga"],
-                "penalty": ["l1", "l2"],
-            },
+            "param_distributions": [
+                {"C": np.logspace(-2, 1, 8), "solver": ["liblinear"], "penalty": ["l1", "l2"]},
+                {"C": np.logspace(-2, 1, 8), "solver": ["lbfgs"],     "penalty": ["l2"]},
+            ],
             "n_iter": 10,
             "imbalance_strategy": "class_weight=balanced",
             "use_balanced_sample_weight": False,
@@ -340,10 +298,11 @@ def build_model_search_configs(random_state: int = 42, n_jobs: int = -1) -> dict
             "pipeline_model_name": "random_forest",
             "estimator": RandomForestClassifier(random_state=random_state, n_jobs=n_jobs),
             "param_distributions": {
-                "n_estimators": [150, 250, 350],
-                "max_depth": [8, 12, 16, None],
-                "min_samples_leaf": [1, 2, 4, 8],
-                "class_weight": ["balanced", "balanced_subsample"],
+                "n_estimators": [100, 200, 300],
+                "max_depth": [8, 12, 16],
+                "min_samples_leaf": [2, 4, 8],
+                "max_features": ["sqrt", "log2", 0.5],
+                "class_weight": ["balanced_subsample"],
             },
             "n_iter": 10,
             "imbalance_strategy": "random_search(class_weight)",
@@ -357,6 +316,7 @@ def build_model_search_configs(random_state: int = 42, n_jobs: int = -1) -> dict
                 "learning_rate": [0.03, 0.05, 0.08, 0.1],
                 "max_leaf_nodes": [15, 31, 63],
                 "min_samples_leaf": [20, 50, 100],
+                "l2_regularization": [0.0, 0.1, 1.0],
             },
             "n_iter": 10,
             "imbalance_strategy": "sample_weight=balanced",
