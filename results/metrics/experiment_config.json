@@ -7,18 +7,23 @@
   "tested_models": [
     "LogReg",
     "RandomForest",
-    "HistGB",
-    "HistGB_Balanced"
+    "HistGB"
   ],
+  "tested_scenarios": [
+    "A",
+    "B",
+    "C"
+  ],
+  "winning_scenario": "B",
   "train_shape": [
-    562520,
-    46
+    552344,
+    29
   ],
   "test_shape": [
-    140630,
-    46
+    138087,
+    29
   ],
-  "feature_count": 46,
+  "feature_count": 29,
   "artifacts": {
     "comparison_csv": "../results/metrics/model_comparison_cv_test.csv",
     "threshold_curve_csv": "../results/metrics/threshold_search_curve.csv",

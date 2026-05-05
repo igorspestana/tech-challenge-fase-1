@@ -1,68 +1,70 @@
 {
-  "model": "HistGB_Balanced",
-  "selection_rule": "fallback: max CV F2 (nenhum modelo atingiu recall mínimo)",
-  "threshold": 0.37999999999999995,
+  "model": "HistGB",
+  "selection_rule": "max CV Average Precision com melhor interpretabilidade  (critério threshold-independente com cenário B)",
+  "threshold": 0.3999999999999999,
+  "scenario": "B",
   "imbalance_strategy": "sample_weight=balanced",
   "metrics": {
-    "threshold": 0.37999999999999995,
-    "recall": 0.835174717368962,
-    "f2": 0.4094344375865978,
-    "f1": 0.2320211285199329,
-    "precision": 0.1347245824180379,
-    "accuracy": 0.38795420607267295,
-    "roc_auc": 0.6841982178483872,
-    "average_precision": 0.29382468453790905,
-    "brier": 0.21351654676395723,
-    "tp": 13002,
-    "tn": 41556,
-    "fp": 83506,
-    "fn": 2566
+    "threshold": 0.3999999999999999,
+    "recall": 0.813502768706517,
+    "f2": 0.38225718212508175,
+    "f1": 0.212937153900472,
+    "precision": 0.1225011224904321,
+    "accuracy": 0.38654616292627114,
+    "roc_auc": 0.6534864475880303,
+    "average_precision": 0.2060113134043402,
+    "brier": 0.2264757521484366,
+    "tp": 11459,
+    "tn": 41918,
+    "fp": 82083,
+    "fn": 2627
   },
   "metrics_default_threshold": {
     "threshold": 0.5,
-    "recall": 0.509313977389517,
-    "f2": 0.3967396199225435,
-    "f1": 0.2979538921143115,
-    "precision": 0.21056964546540963,
-    "accuracy": 0.7343027803455877,
-    "roc_auc": 0.6841982178483872,
-    "average_precision": 0.29382468453790905,
-    "brier": 0.21351654676395723,
-    "tp": 7929,
-    "tn": 95336,
-    "fp": 29726,
-    "fn": 7639
+    "recall": 0.5067442851057787,
+    "f2": 0.3614799509789027,
+    "f1": 0.25278441788401945,
+    "precision": 0.1683927434004105,
+    "accuracy": 0.6944028040293438,
+    "roc_auc": 0.6534864475880303,
+    "average_precision": 0.2060113134043402,
+    "brier": 0.2264757521484366,
+    "tp": 7138,
+    "tn": 88750,
+    "fp": 35251,
+    "fn": 6948
   },
   "bootstrap_ci_95": {
     "roc_auc": {
-      "low": 0.6798158814381697,
-      "high": 0.6886500295679475
+      "low": 0.6485964571711265,
+      "high": 0.6585227493061319
     },
     "average_precision": {
-      "low": 0.28542628874818204,
-      "high": 0.301420291214716
+      "low": 0.20000292462368613,
+      "high": 0.21230825782978013
     },
     "precision": {
-      "low": 0.13235825101098364,
-      "high": 0.13674036208015808
+      "low": 0.1199497895368009,
+      "high": 0.12442715115437733
     },
     "recall": {
-      "low": 0.8301449803313651,
-      "high": 0.8405634167912109
+      "low": 0.8066443041826367,
+      "high": 0.8202600354791322
     },
     "f2": {
-      "low": 0.40503335911039906,
-      "high": 0.41367011326195363
+      "low": 0.3765628902650627,
+      "high": 0.3866848759925737
     },
     "brier": {
-      "low": 0.21283725133594042,
-      "high": 0.2142101733438727
+      "low": 0.2258824185275359,
+      "high": 0.22714470658414854
     }
   },
   "best_params": {
     "min_samples_leaf": 100,
-    "max_leaf_nodes": 15,
-    "max_iter": 150,
-    "learning_rate": 0.1
+    "max_leaf_nodes": 31,
+    "max_iter": 350,
+    "learning_rate": 0.05,
+    "l2_regularization": 1.0
   }
 }
