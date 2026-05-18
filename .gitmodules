@@ -1,0 +1,6 @@
+[submodule "IADEVS_COMPUTERVISION"]
+	path = IADEVS_COMPUTERVISION
+	url = git@github.com:FIAP/IADEVS_COMPUTERVISION.git
+[submodule "tech-challenge-fase-1"]
+	path = tech-challenge-fase-1
+	url = git@github.com:igorspestana/tech-challenge-fase-1.git

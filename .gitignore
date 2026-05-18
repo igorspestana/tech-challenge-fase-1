@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+machine_learning/
+deep_learning/
+pyvenv.cfg
+
+# Jupyter
+.ipynb_checkpoints/
+.virtual_documents/
+
+# Lock files
+uv.lock
+
+# Configs de ambiente
+.env
+.env.*
+
+# Dados grandes (DATASUS / SISCAN)
+*.parquet
+*.rar
+tech_challenge/SISCAN_*.csv
+tech_challenge/TAB_SISCAN.*
+
+# Artefatos de modelo e outputs gerados
+tech-challenge-fase-1/results/artifacts/
+tech-challenge-fase-1/results/figures/
+tech-challenge-fase-1/results/metrics/
+
+# Vídeos e imagens processadas
+phase1_computer_vision/rastreability/videos/
+phase1_computer_vision/content/processed/
