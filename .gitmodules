@@ -10,3 +10,6 @@
 [submodule "genetic_algorithm_camouflage"]
 	path = genetic_algorithm_camouflage
 	url = git@github.com:FIAP/genetic_algorithm_camouflage.git
+[submodule "IADT-LLMS"]
+	path = IADT-LLMS
+	url = git@github.com:FIAP/IADT-LLMS.git
