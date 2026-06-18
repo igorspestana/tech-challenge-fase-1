@@ -1,0 +1,23 @@
+# Dados brutos — grandes demais para git
+data/
+
+# Ambiente virtual
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Artefatos de modelo (binários grandes)
+results/artifacts/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Lock file gerado automaticamente
+uv.lock
+
+# Sistema
+.DS_Store
+*.swp
