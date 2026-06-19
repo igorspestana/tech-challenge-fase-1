@@ -1,0 +1,82 @@
+# compose.scalable.yaml
+# =====================
+# Docker Compose com configurações de escalabilidade para o pipeline de ML.
+#
+# USO:
+#   Desenvolvimento local:
+#     docker compose -f compose.scalable.yaml up --build
+#
+#   Rodar pipeline escalável (one-shot):
+#     docker compose -f compose.scalable.yaml run --rm pipeline
+#
+#   Escalar workers manualmente (ex: 3 instâncias paralelas):
+#     docker compose -f compose.scalable.yaml up --scale pipeline=3
+
+services:
+
+  # ─────────────────────────────────────────────────────────────
+  # Jupyter Lab — ambiente de desenvolvimento interativo
+  # ─────────────────────────────────────────────────────────────
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tech-challenge-fase-1
+    command: uv run jupyter lab --ip=0.0.0.0 --no-browser --allow-root
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/app/notebooks
+      - ./data:/app/data
+      - ./results:/app/results
+      - ./src:/app/src
+    environment:
+      - PYTHONUNBUFFERED=1        # logs aparecem em tempo real (sem buffer)
+      - PYTHONDONTWRITEBYTECODE=1
+      - LOG_LEVEL=INFO
+      - N_JOBS=-1                 # usa 80% dos CPUs disponíveis no container
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"            # máximo de CPUs para o Jupyter
+          memory: 4G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/api"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ─────────────────────────────────────────────────────────────
+  # Pipeline — execução do pipeline de ML em modo batch
+  # Pode ser escalado horizontalmente com --scale pipeline=N
+  # ─────────────────────────────────────────────────────────────
+  pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tech-challenge-fase-1
+    command: uv run python -m pipeline
+    volumes:
+      - ./data:/app/data
+      - ./results:/app/results
+      - ./src:/app/src
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+      - N_JOBS=-1                 # usa 80% dos CPUs disponíveis no container
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"            # pipeline recebe mais CPU que o Jupyter
+          memory: 8G
+        reservations:
+          cpus: "1.0"
+          memory: 1G
+      restart_policy:
+        condition: on-failure    # reinicia automaticamente se falhar
+        delay: 5s
+        max_attempts: 3
